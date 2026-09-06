@@ -34,10 +34,9 @@ st.markdown("""
     padding: 25px;
     border-radius: 20px;
     border: 1px solid rgba(56,189,248,0.25);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
 }
 .badge {
-    background: linear-gradient(90deg, #38bdf8, #60a5fa);
+    background: #38bdf8;
     color: black;
     padding: 4px 12px;
     border-radius: 20px;
@@ -57,7 +56,6 @@ def load_model():
     df = pd.read_csv(url)
     df["Sex"] = df["Sex"].map({"male":0,"female":1})
     df["Age"] = df["Age"].fillna(df["Age"].median())
-    df["Embarked"] = df["Embarked"].fillna("S")
-    df = pd.get_dummies(df, columns=["Embarked"])
-    if "Embarked_C" not in df.columns:
-        df["Embarked_C"] =
+    X = df[["Pclass","Sex","Age","SibSp","Parch","Fare"]]
+    y = df["Survived"]
+    model = RandomForest
