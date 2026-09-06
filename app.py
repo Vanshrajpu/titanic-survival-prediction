@@ -3,126 +3,111 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
-st.set_page_config(page_title="Titanic AI - Survival Predictor", page_icon="🚢", layout="wide")
+st.set_page_config(page_title="Titanic Survival Predictor", page_icon="🚢", layout="centered")
 
-st.markdown("""
+# CSS - Fixed, no triple quote issue
+st.markdown(
+    """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
-* { font-family: 'Outfit', sans-serif; }
-.stApp { background: #070A12; }
+.stApp { background-color: #0E1117; }
 
-/* HERO */
-.hero {
+@keyframes float-ship {
+  0% { transform: translateY(0px) rotate(-3deg); }
+  50% { transform: translateY(-15px) rotate(3deg) scale(1.08); }
+  100% { transform: translateY(0px) rotate(-3deg); }
+}
+.ship-anim {
+  font-size: 75px;
   text-align: center;
-  padding: 40px 20px 20px 20px;
-}
-@keyframes float {
-  0% { transform: translateY(0px) rotate(-2deg); }
-  50% { transform: translateY(-20px) rotate(2deg) scale(1.1); }
-  100% { transform: translateY(0px) rotate(-2deg); }
-}
-@keyframes wave {
-  0% { transform: translateX(-10%); }
-  100% { transform: translateX(10%); }
-}
-.ship {
-  font-size: 90px;
-  animation: float 3s ease-in-out infinite;
-  display: inline-block;
-  filter: drop-shadow(0 0 30px #3B82F6);
-}
-.gradient-text {
-  background: linear-gradient(90deg, #60A5FA, #A78BFA, #F472B6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 55px;
-  font-weight: 900;
-  line-height: 1.1;
-}
-.hero-sub {
-  color: #94A3B8;
-  font-size: 18px;
-  margin-top: 15px;
+  animation: float-ship 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px #3B82F6);
 }
 
-/* CARDS */
-.glass-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+.card {
+    background-color: #1E232F;
+    padding: 25px;
+    border-radius: 18px;
+    border: 1px solid #2D3748;
 }
 .badge {
-  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 100px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  display: inline-block;
-  margin-bottom: 8px;
+    background-color: #3B82F6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 6px;
 }
-
-/* STATS */
-.stat-card {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 18px;
-  text-align: center;
-}
-.stat-num { font-size: 28px; font-weight: 900; color: #60A5FA; }
-.stat-label { color: #94A3B8; font-size: 12px; }
-
-/* BUTTON */
-div[data-testid="stButton"] > button {
-  background: linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899);
-  border: none;
-  border-radius: 100px;
-  padding: 15px;
-  font-weight: 800;
-  font-size: 16px;
-  letter-spacing: 0.5px;
-  transition: 0.3s;
-}
-div[data-testid="stButton"] > button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 10px 40px rgba(139,92,246,0.5);
-}
-
-/* INPUTS */
-div[data-baseweb="select"] > div, input {
-  background: rgba(0,0,0,0.4)!important;
-  border-radius: 12px!important;
-  border: 1px solid rgba(255,255,255,0.1)!important;
-  color: white!important;
-}
+.result-red { background: linear-gradient(135deg,#FF6B6B,#EF4444); padding: 25px; border-radius: 15px; text-align: center; color: white; }
+.result-green { background: linear-gradient(135deg,#10B981,#059669); padding: 25px; border-radius: 15px; text-align: center; color: white; }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 @st.cache_resource
 def get_model():
     url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
     df = pd.read_csv(url)
-    df['Sex'] = df['Sex'].map({'male':0,'female':1})
-    df['Age'].fillna(df['Age'].median(), inplace=True)
-    df['Embarked'].fillna('S', inplace=True)
-    df = pd.get_dummies(df, columns=['Embarked'])
-    for c in ['Embarked_C','Embarked_Q','Embarked_S']:
-        if c not in df.columns: df[c]=0
-    X = df[['Pclass','Sex','Age','SibSp','Parch','Fare','Embarked_Q','Embarked_S']]
-    y = df['Survived']
-    m = RandomForestClassifier(n_estimators=150, random_state=42)
-    m.fit(X,y)
-    return m
+    df["Sex"] = df["Sex"].map({"male": 0, "female": 1})
+    df["Age"] = df["Age"].fillna(df["Age"].median())
+    df["Embarked"] = df["Embarked"].fillna("S")
+    df = pd.get_dummies(df, columns=["Embarked"])
+    for col in ["Embarked_C", "Embarked_Q", "Embarked_S"]:
+        if col not in df.columns:
+            df[col] = 0
+    X = df[["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked_Q", "Embarked_S"]]
+    y = df["Survived"]
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X, y)
+    return model
 
 model = get_model()
 
-# ===== HERO SECTION (Website jaisa) =====
-st.markdown("""
-<div class="hero">
-  <div class="ship">🚢</div>
-  <div class="gradient-text">
+# Header
+st.markdown('<div class="ship-anim">🚢</div>', unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:center;'>Titanic Survival Prediction</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#9CA3AF;'>Machine Learning Powered Predictor<br>Built by Vansh Rajput</p>", unsafe_allow_html=True)
+
+# Card
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.markdown("### Passenger Information")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown('<div class="badge">🎫 Passenger Class</div>', unsafe_allow_html=True)
+    pclass = st.selectbox("pclass", [1, 2, 3], index=2, label_visibility="collapsed")
+    st.markdown('<div class="badge" style="margin-top:12px;">🎂 Age</div>', unsafe_allow_html=True)
+    age = st.number_input("age", 0, 100, 25, label_visibility="collapsed")
+    st.markdown('<div class="badge" style="margin-top:12px;">👥 Siblings / Spouse</div>', unsafe_allow_html=True)
+    sibsp = st.number_input("sibsp", 0, 10, 0, label_visibility="collapsed")
+
+with col2:
+    st.markdown('<div class="badge">👤 Gender</div>', unsafe_allow_html=True)
+    gender = st.selectbox("gender", ["male", "female"], label_visibility="collapsed")
+    st.markdown('<div class="badge" style="margin-top:12px;">💰 Fare</div>', unsafe_allow_html=True)
+    fare = st.number_input("fare", 0.0, 600.0, 10.0, label_visibility="collapsed")
+    st.markdown('<div class="badge" style="margin-top:12px;">👶 Parents / Children</div>', unsafe_allow_html=True)
+    parch = st.number_input("parch", 0, 10, 0, label_visibility="collapsed")
+
+st.markdown("</div>", unsafe_allow_html=True)
+st.write("")
+
+if st.button("🔮 Predict Survival", use_container_width=True, type="primary"):
+    sex_val = 1 if gender == "female" else 0
+    data = np.array([[pclass, sex_val, age, sibsp, parch, fare, 0, 1]])
+    pred = model.predict(data)[0]
+    proba = model.predict_proba(data)[0]
+    survived = proba[1] * 100
+    not_survived = proba[0] * 100
+
+    st.markdown("#### ✨ Prediction Result")
+    if pred == 1:
+        st.markdown(f'<div class="result-green"><div style="font-size:45px;">✓</div><h2>SURVIVED</h2><p>{survived:.1f}% chance</p></div>', unsafe_allow_html=True)
+        st.balloons()
+    else:
+        st.markdown(f'<div class="result-red"><div style="font-size:45px;">X</div><h2>DID NOT SURVIVE</h2><p>{not_survived:.1f}% risk</p></div>', unsafe_allow_html=True)
+
+    st.write(f"Survived {survived:.1f}%")
+    st.progress(int(survived))
