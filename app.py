@@ -1,68 +1,52 @@
 import streamlit as st
-import pickle
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 
-# Page config
-st.set_page_config(page_title="Titanic Survival Predictor", page_icon="🚢", layout="wide")
+st.set_page_config(page_title="Titanic Survival Predictor", page_icon="🚢", layout="centered")
 
-# CSS - aapka wahi glass wala design
-st.markdown("""
-<style>
-.glass-card {
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 20px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Model load
 @st.cache_resource
 def load_model():
-    return pickle.load(open('titanic_model.pkl', 'rb'))
+    # Model training inside app - no pkl needed
+    url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+    df = pd.read_csv(url)
+    df['Sex'] = df['Sex'].map({'male':0, 'female':1})
+    df['Age'].fillna(df['Age'].median(), inplace=True)
+    df['Embarked'].fillna('S', inplace=True)
+    df = pd.get_dummies(df, columns=['Embarked'], drop_first=False)
+    if 'Embarked_C' not in df.columns:
+        df['Embarked_C'] = 0
+    X = df[['Pclass','Sex','Age','SibSp','Parch','Fare','Embarked_Q','Embarked_S']]
+    y = df['Survived']
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X, y)
+    return model
 
 model = load_model()
 
 st.title("🚢 Titanic Survival Prediction")
+st.write("Passenger details daal ke predict kijiye")
 
-# --- INPUTS - Aapke wahi inputs ---
-col1, col2, col3, col4 = st.columns(4)
+col1, col2 = st.columns(2)
 with col1:
     pclass = st.selectbox("🎫 Passenger Class", [1,2,3], index=2)
-with col2:
     sex = st.selectbox("👤 Gender", ["male", "female"])
-with col3:
-    age = st.number_input("🎂 Age", value=25)
-with col4:
-    fare = st.number_input("💰 Fare", value=10.0)
-
-col5, col6, col7 = st.columns(3)
-with col5:
-    sibsp = st.number_input("👨‍👩‍👧‍👦 Siblings / Spouses", value=0)
-with col6:
-    parch = st.number_input("👨‍👩‍👧 Parents / Children", value=0)
-with col7:
+    age = st.slider("🎂 Age", 0, 100, 25)
+with col2:
+    sibsp = st.number_input("Siblings / Spouses", 0, 10, 0)
+    parch = st.number_input("Parents / Children", 0, 10, 0)
+    fare = st.number_input("💰 Fare", 0.0, 600.0, 32.0)
     embarked = st.selectbox("📍 Embarked", ["S","C","Q"])
 
-# --- PREDICT BUTTON ---
 if st.button("🔮 Predict Survival", use_container_width=True):
-    input_data = pd.DataFrame([[pclass, sex, age, sibsp, parch, fare, embarked]],
-                              columns=['Pclass','Sex','Age','SibSp','Parch','Fare','Embarked'])
-
-    # Yaha aapka encoding logic ayega
-    # input_data['Sex'] =...
-
-    prediction = model.predict(input_data)[0]
+    sex_val = 1 if sex == "female" else 0
+    embarked_Q = 1 if embarked == "Q" else 0
+    embarked_S = 1 if embarked == "S" else 0
+    import numpy as np
+    input_data = np.array([[pclass, sex_val, age, sibsp, parch, fare, embarked_Q, embarked_S]])
+    pred = model.predict(input_data)[0]
     prob = model.predict_proba(input_data)[0][1]
-
-    if prediction == 1:
-        st.success(f"✅ SURVIVED - Probability: {prob:.2f}")
+    if pred == 1:
+        st.success(f"✅ SURVIVED - {prob*100:.1f}% chance")
         st.balloons()
     else:
-        st.markdown(f"""
-        <div style='background:#ff6b6b; color:white; padding:20px; border-radius:15px; text-align:center'>
-            <h2>❌ DID NOT SURVIVE</h2>
-            <p>The model predicts that this passenger did not survive. (Prob: {prob:.2f})</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.error(f"❌ DID NOT SURVIVE - {prob*100:.1f}% chance")
