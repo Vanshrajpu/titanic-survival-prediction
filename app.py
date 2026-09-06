@@ -1,7 +1,9 @@
+```python
 import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+
 
 # =========================================================
 # PAGE CONFIG
@@ -14,492 +16,439 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+
 # =========================================================
-# PREMIUM CSS
+# PROFESSIONAL CSS
 # =========================================================
 
 st.markdown("""
 <style>
 
-/* ================= BACKGROUND ================= */
+/* ---------- GLOBAL ---------- */
+
+* {
+    box-sizing: border-box;
+}
 
 .stApp {
     background:
-        radial-gradient(circle at 10% 20%, rgba(14,165,233,.15), transparent 25%),
-        radial-gradient(circle at 90% 80%, rgba(6,182,212,.12), transparent 25%),
-        linear-gradient(135deg,#020617,#0f172a,#082f49,#020617);
+        radial-gradient(
+            circle at 50% -20%,
+            rgba(14, 165, 233, 0.20),
+            transparent 45%
+        ),
+        linear-gradient(
+            145deg,
+            #020617 0%,
+            #071426 50%,
+            #020617 100%
+        );
 
-    background-size: 200% 200%;
-    animation: backgroundMove 15s ease infinite;
+    color: #f8fafc;
 }
 
-@keyframes backgroundMove {
-    0%   {background-position:0% 50%;}
-    50%  {background-position:100% 50%;}
-    100% {background-position:0% 50%;}
+/* Remove Streamlit default spacing */
+
+.block-container {
+    max-width: 850px !important;
+    padding-top: 25px !important;
+    padding-bottom: 20px !important;
 }
 
-/* ================= HIDE STREAMLIT ================= */
+/* Hide default Streamlit elements */
 
 #MainMenu {
-    visibility:hidden;
-}
-
-footer {
-    visibility:hidden;
+    visibility: hidden;
 }
 
 header {
-    visibility:hidden;
+    visibility: hidden;
 }
 
-/* ================= MAIN CONTAINER ================= */
-
-.block-container {
-    max-width: 900px;
-    padding-top: 30px;
+footer {
+    visibility: hidden;
 }
 
-/* ================= SHIP ================= */
+/* ---------- HERO ---------- */
+
+.hero {
+    text-align: center;
+    margin-bottom: 25px;
+}
 
 .ship {
-    font-size:95px;
-    text-align:center;
+    font-size: 72px;
+    line-height: 1;
+    display: inline-block;
 
-    animation:
-        shipFloat 3s ease-in-out infinite,
-        shipGlow 2s ease-in-out infinite alternate;
+    animation: floatShip 3s ease-in-out infinite;
 
-    margin-bottom:-10px;
+    filter:
+        drop-shadow(0 0 8px rgba(56,189,248,.7))
+        drop-shadow(0 0 25px rgba(14,165,233,.4));
 }
 
-@keyframes shipFloat {
+@keyframes floatShip {
 
-    0% {
-        transform:translateY(0px) rotate(-3deg);
+    0%,100% {
+        transform: translateY(0) rotate(-2deg);
     }
 
     50% {
-        transform:translateY(-18px) rotate(3deg) scale(1.08);
-    }
-
-    100% {
-        transform:translateY(0px) rotate(-3deg);
+        transform: translateY(-10px) rotate(2deg);
     }
 }
 
-@keyframes shipGlow {
+.ai-label {
+    display: inline-block;
 
-    from {
-        filter:drop-shadow(0 0 8px #38bdf8);
-    }
+    margin-top: 14px;
+    padding: 6px 14px;
 
-    to {
-        filter:drop-shadow(0 0 35px #0ea5e9);
-    }
+    border-radius: 50px;
+
+    background: rgba(14,165,233,.10);
+
+    border: 1px solid rgba(56,189,248,.25);
+
+    color: #7dd3fc;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
 }
-
-/* ================= TITLE ================= */
 
 .title {
+    margin-top: 12px;
 
-    text-align:center;
+    font-size: 40px;
+    font-weight: 800;
 
-    font-size:48px;
+    letter-spacing: -1px;
 
-    font-weight:900;
-
-    background:
-        linear-gradient(
-            90deg,
-            #38bdf8,
-            #22d3ee,
-            #ffffff,
-            #38bdf8
-        );
-
-    background-size:300%;
-
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-
-    animation:titleMove 5s linear infinite;
-
-    letter-spacing:1px;
+    color: #f8fafc;
 }
 
-@keyframes titleMove {
-
-    0% {
-        background-position:0%;
-    }
-
-    100% {
-        background-position:300%;
-    }
+.title span {
+    color: #38bdf8;
 }
 
 .subtitle {
+    color: #94a3b8;
 
-    text-align:center;
+    font-size: 14px;
 
-    color:#94a3b8;
-
-    font-size:17px;
-
-    margin-bottom:30px;
+    margin-top: 7px;
 }
 
-/* ================= AI BADGE ================= */
 
-.ai-badge {
+/* ---------- MAIN CARD ---------- */
 
-    width:max-content;
-
-    margin:auto;
-
-    padding:7px 18px;
-
-    border-radius:30px;
-
-    background:rgba(14,165,233,.12);
-
-    border:1px solid rgba(56,189,248,.4);
-
-    color:#7dd3fc;
-
-    font-size:13px;
-
-    font-weight:bold;
-
-    box-shadow:0 0 20px rgba(14,165,233,.15);
-}
-
-/* ================= CARD ================= */
-
-.card {
-
+.main-card {
     background:
         linear-gradient(
-            135deg,
-            rgba(15,23,42,.90),
-            rgba(30,41,59,.75)
+            145deg,
+            rgba(15,23,42,.96),
+            rgba(15,30,50,.94)
         );
 
-    backdrop-filter:blur(20px);
+    border: 1px solid rgba(148,163,184,.14);
 
-    border:1px solid rgba(148,163,184,.15);
+    border-radius: 24px;
 
-    border-radius:28px;
-
-    padding:30px;
+    padding: 30px;
 
     box-shadow:
         0 25px 70px rgba(0,0,0,.45),
-        inset 0 1px 0 rgba(255,255,255,.05);
-
-    margin-top:25px;
+        inset 0 1px 0 rgba(255,255,255,.04);
 }
 
-/* ================= SECTION TITLE ================= */
 
-.section-title {
+/* ---------- CARD HEADER ---------- */
 
-    font-size:24px;
+.card-heading {
+    font-size: 19px;
+    font-weight: 700;
 
-    font-weight:800;
+    color: #f8fafc;
 
-    color:#f8fafc;
-
-    margin-bottom:20px;
+    margin-bottom: 22px;
 }
 
-/* ================= LABEL ================= */
-
-.custom-label {
-
-    color:#7dd3fc;
-
-    font-size:12px;
-
-    font-weight:800;
-
-    letter-spacing:1px;
-
-    margin-bottom:6px;
+.card-heading span {
+    color: #38bdf8;
 }
 
-/* ================= INPUTS ================= */
 
-.stSelectbox > div > div,
-.stNumberInput > div > div {
+/* ---------- INPUT LABEL ---------- */
 
-    background:rgba(15,23,42,.75) !important;
+.input-label {
+    color: #94a3b8;
 
-    border:1px solid rgba(56,189,248,.20) !important;
+    font-size: 11px;
 
-    border-radius:13px !important;
+    font-weight: 700;
 
-    color:white !important;
+    letter-spacing: 1px;
+
+    margin-bottom: 6px;
 }
 
-/* ================= BUTTON ================= */
+
+/* ---------- INPUTS ---------- */
+
+div[data-baseweb="select"] > div {
+
+    background: #0b1628 !important;
+
+    border: 1px solid #1e3a52 !important;
+
+    border-radius: 11px !important;
+
+    min-height: 43px !important;
+}
+
+div[data-baseweb="select"] > div:hover {
+
+    border-color: #38bdf8 !important;
+}
+
+.stNumberInput input {
+
+    background: #0b1628 !important;
+
+    color: #f8fafc !important;
+
+    border: 1px solid #1e3a52 !important;
+
+    border-radius: 11px !important;
+
+    min-height: 43px !important;
+}
+
+.stNumberInput input:focus {
+
+    border-color: #38bdf8 !important;
+
+    box-shadow:
+        0 0 0 1px #38bdf8 !important;
+}
+
+
+/* Remove label generated by Streamlit */
+
+.stSelectbox label,
+.stNumberInput label {
+    display: none;
+}
+
+
+/* ---------- BUTTON ---------- */
+
+.stButton {
+    margin-top: 10px;
+}
 
 .stButton > button {
 
-    height:58px;
+    width: 100%;
 
-    border-radius:17px;
+    height: 52px;
 
-    border:none;
+    border-radius: 12px;
 
-    font-size:18px;
+    border: none;
 
-    font-weight:800;
+    font-size: 15px;
 
-    color:white;
+    font-weight: 700;
+
+    color: white;
 
     background:
         linear-gradient(
             90deg,
             #0284c7,
-            #06b6d4,
-            #0284c7
+            #0ea5e9,
+            #06b6d4
         );
 
-    background-size:200%;
-
     box-shadow:
-        0 8px 30px rgba(14,165,233,.30);
+        0 10px 30px rgba(14,165,233,.25);
 
-    transition:.3s;
-
+    transition: all .25s ease;
 }
 
 .stButton > button:hover {
 
-    transform:translateY(-3px) scale(1.01);
-
-    background-position:100%;
+    transform: translateY(-2px);
 
     box-shadow:
-        0 12px 40px rgba(14,165,233,.55);
-
+        0 14px 35px rgba(14,165,233,.40);
 }
 
-/* ================= RESULT ================= */
+
+/* ---------- RESULT ---------- */
 
 .result {
 
-    margin-top:25px;
+    margin-top: 22px;
 
-    padding:30px;
+    padding: 25px;
 
-    border-radius:24px;
+    border-radius: 18px;
 
-    text-align:center;
+    text-align: center;
 
-    animation:resultAppear .6s ease;
-
+    animation: resultIn .45s ease;
 }
 
-@keyframes resultAppear {
+@keyframes resultIn {
 
     from {
-        opacity:0;
-        transform:translateY(25px) scale(.95);
+        opacity: 0;
+        transform: translateY(12px);
     }
 
     to {
-        opacity:1;
-        transform:translateY(0) scale(1);
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-.survived {
+.result.success {
 
     background:
         linear-gradient(
             135deg,
-            rgba(16,185,129,.95),
-            rgba(5,150,105,.85)
+            rgba(5,150,105,.95),
+            rgba(16,185,129,.85)
         );
 
-    box-shadow:
-        0 15px 50px rgba(16,185,129,.25);
+    border: 1px solid rgba(110,231,183,.3);
 }
 
-.not-survived {
+.result.danger {
 
     background:
         linear-gradient(
             135deg,
-            rgba(239,68,68,.95),
-            rgba(185,28,28,.85)
+            rgba(185,28,28,.95),
+            rgba(239,68,68,.85)
         );
 
-    box-shadow:
-        0 15px 50px rgba(239,68,68,.25);
+    border: 1px solid rgba(252,165,165,.3);
 }
 
 .result-icon {
-
-    font-size:65px;
-
-    animation:iconPop .7s ease;
+    font-size: 45px;
 }
 
-@keyframes iconPop {
+.result-title {
 
-    0% {
-        transform:scale(.3) rotate(-20deg);
-    }
+    margin-top: 5px;
 
-    70% {
-        transform:scale(1.2) rotate(5deg);
-    }
+    color: white;
 
-    100% {
-        transform:scale(1);
-    }
+    font-size: 24px;
+
+    font-weight: 800;
 }
 
-.result h2 {
+.result-text {
 
-    font-size:30px;
+    color: rgba(255,255,255,.85);
 
-    margin:10px 0;
+    font-size: 14px;
 
-    color:white;
+    margin-top: 5px;
 }
 
-.probability {
 
-    font-size:22px;
+/* ---------- CUSTOM PROGRESS ---------- */
 
-    font-weight:bold;
+.progress-container {
 
-    color:white;
+    margin-top: 18px;
+
+    text-align: left;
 }
 
-/* ================= INFO CARDS ================= */
+.progress-label {
 
-.info-box {
+    display: flex;
 
-    background:rgba(15,23,42,.55);
+    justify-content: space-between;
 
-    border:1px solid rgba(56,189,248,.12);
+    color: rgba(255,255,255,.8);
 
-    border-radius:18px;
+    font-size: 12px;
 
-    padding:18px;
-
-    text-align:center;
-
-    transition:.3s;
+    margin-bottom: 7px;
 }
 
-.info-box:hover {
+.progress-bg {
 
-    transform:translateY(-5px);
+    height: 8px;
 
-    border-color:rgba(56,189,248,.5);
+    background: rgba(255,255,255,.18);
 
-    box-shadow:0 10px 30px rgba(14,165,233,.12);
+    border-radius: 20px;
+
+    overflow: hidden;
 }
 
-.info-number {
+.progress-fill {
 
-    font-size:25px;
+    height: 100%;
 
-    font-weight:900;
+    border-radius: 20px;
 
-    color:#38bdf8;
+    background: white;
+
+    box-shadow:
+        0 0 12px rgba(255,255,255,.7);
 }
 
-.info-text {
 
-    color:#94a3b8;
-
-    font-size:12px;
-
-}
-
-/* ================= DIVIDER ================= */
-
-.divider {
-
-    height:1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(56,189,248,.4),
-            transparent
-        );
-
-    margin:30px 0;
-}
-
-/* ================= FOOTER ================= */
+/* ---------- FOOTER ---------- */
 
 .footer {
 
-    text-align:center;
+    text-align: center;
 
-    color:#64748b;
+    color: #64748b;
 
-    font-size:13px;
+    font-size: 11px;
 
-    margin-top:35px;
-
-    padding-bottom:20px;
+    margin-top: 20px;
 }
 
-.footer span {
-
-    color:#38bdf8;
-
-    font-weight:bold;
+.footer strong {
+    color: #38bdf8;
 }
 
-/* ================= WAVES ================= */
 
-.wave {
+/* ---------- MOBILE ---------- */
 
-    position:fixed;
+@media (max-width: 600px) {
 
-    bottom:0;
-
-    left:0;
-
-    width:100%;
-
-    height:100px;
-
-    opacity:.07;
-
-    background:
-        radial-gradient(
-            ellipse at center,
-            #38bdf8 0%,
-            transparent 70%
-        );
-
-    animation:waveMove 5s ease-in-out infinite;
-
-    pointer-events:none;
-}
-
-@keyframes waveMove {
-
-    0%,100% {
-        transform:translateX(-30px);
+    .block-container {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
     }
 
-    50% {
-        transform:translateX(30px);
+    .main-card {
+        padding: 20px;
+    }
+
+    .title {
+        font-size: 31px;
+    }
+
+    .ship {
+        font-size: 60px;
     }
 }
 
@@ -514,38 +463,42 @@ header {
 @st.cache_resource
 def load_model():
 
-    url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+    url = (
+        "https://raw.githubusercontent.com/"
+        "datasciencedojo/datasets/master/titanic.csv"
+    )
 
     df = pd.read_csv(url)
 
-    # Gender
+    # Gender encoding
     df["Sex"] = df["Sex"].map({
         "male": 0,
         "female": 1
     })
 
-    # Age
+    # Fill missing age
     df["Age"] = df["Age"].fillna(
         df["Age"].median()
     )
 
-    # Embarked
+    # Fill missing Embarked
     df["Embarked"] = df["Embarked"].fillna("S")
 
+    # One-hot encoding
     df = pd.get_dummies(
         df,
         columns=["Embarked"]
     )
 
     # Make sure columns exist
-    for col in [
+    for column in [
         "Embarked_C",
         "Embarked_Q",
         "Embarked_S"
     ]:
 
-        if col not in df.columns:
-            df[col] = 0
+        if column not in df.columns:
+            df[column] = 0
 
     # Features
     X = df[
@@ -561,8 +514,10 @@ def load_model():
         ]
     ]
 
+    # Target
     y = df["Survived"]
 
+    # Random Forest
     model = RandomForestClassifier(
         n_estimators=150,
         random_state=42
@@ -577,116 +532,71 @@ model = load_model()
 
 
 # =========================================================
-# HERO
+# HERO SECTION
 # =========================================================
 
-st.markdown(
-    '<div class="wave"></div>',
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div class="hero">
 
-st.markdown(
-    '<div class="ai-badge">🤖 POWERED BY MACHINE LEARNING</div>',
-    unsafe_allow_html=True
-)
+    <div class="ship">🚢</div>
 
-st.markdown(
-    '<div class="ship">🚢</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="title">Titanic AI Predictor</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '''
-    <div class="subtitle">
-    Predict passenger survival using a Random Forest Machine Learning model
+    <div>
+        <span class="ai-label">
+            ✦ ARTIFICIAL INTELLIGENCE
+        </span>
     </div>
-    ''',
-    unsafe_allow_html=True
-)
+
+    <div class="title">
+        Titanic <span>Survival</span> Predictor
+    </div>
+
+    <div class="subtitle">
+        Machine Learning powered passenger survival prediction
+    </div>
+
+</div>
+""", unsafe_allow_html=True)
 
 
 # =========================================================
-# INFO CARDS
+# MAIN CARD
 # =========================================================
 
-a, b, c = st.columns(3)
+st.markdown("""
+<div class="main-card">
 
-with a:
-    st.markdown(
-        '''
-        <div class="info-box">
-            <div class="info-number">🚢</div>
-            <div class="info-text">TITANIC DATASET</div>
-        </div>
-        ''',
-        unsafe_allow_html=True
-    )
+    <div class="card-heading">
+        👤 Passenger <span>Details</span>
+    </div>
 
-with b:
-    st.markdown(
-        '''
-        <div class="info-box">
-            <div class="info-number">🌲</div>
-            <div class="info-text">RANDOM FOREST</div>
-        </div>
-        ''',
-        unsafe_allow_html=True
-    )
-
-with c:
-    st.markdown(
-        '''
-        <div class="info-box">
-            <div class="info-number">🎯</div>
-            <div class="info-text">SURVIVAL PREDICTION</div>
-        </div>
-        ''',
-        unsafe_allow_html=True
-    )
+""", unsafe_allow_html=True)
 
 
 # =========================================================
-# INPUT CARD
+# INPUTS
 # =========================================================
 
-st.markdown(
-    '<div class="card">',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="section-title">👤 Passenger Information</div>',
-    unsafe_allow_html=True
-)
-
-c1, c2 = st.columns(2)
+col1, col2 = st.columns(2, gap="large")
 
 
-# =========================================================
-# LEFT COLUMN
-# =========================================================
+# ---------- LEFT ----------
 
-with c1:
+with col1:
 
     st.markdown(
-        '<div class="custom-label">🎫 PASSENGER CLASS</div>',
+        '<div class="input-label">PASSENGER CLASS</div>',
         unsafe_allow_html=True
     )
 
     pclass = st.selectbox(
-        "Passenger Class",
+        "Class",
         [1, 2, 3],
         index=2,
         label_visibility="collapsed"
     )
 
     st.markdown(
-        '<div class="custom-label">🎂 AGE</div>',
+        '<div class="input-label">AGE</div>',
         unsafe_allow_html=True
     )
 
@@ -695,11 +605,12 @@ with c1:
         min_value=0,
         max_value=100,
         value=25,
+        step=1,
         label_visibility="collapsed"
     )
 
     st.markdown(
-        '<div class="custom-label">👨‍👩‍👧 SIBLINGS / SPOUSES</div>',
+        '<div class="input-label">SIBLINGS / SPOUSES</div>',
         unsafe_allow_html=True
     )
 
@@ -708,18 +619,17 @@ with c1:
         min_value=0,
         max_value=10,
         value=0,
+        step=1,
         label_visibility="collapsed"
     )
 
 
-# =========================================================
-# RIGHT COLUMN
-# =========================================================
+# ---------- RIGHT ----------
 
-with c2:
+with col2:
 
     st.markdown(
-        '<div class="custom-label">⚧ GENDER</div>',
+        '<div class="input-label">GENDER</div>',
         unsafe_allow_html=True
     )
 
@@ -730,7 +640,7 @@ with c2:
     )
 
     st.markdown(
-        '<div class="custom-label">💰 TICKET FARE</div>',
+        '<div class="input-label">TICKET FARE</div>',
         unsafe_allow_html=True
     )
 
@@ -744,7 +654,7 @@ with c2:
     )
 
     st.markdown(
-        '<div class="custom-label">👨‍👩‍👧 PARENTS / CHILDREN</div>',
+        '<div class="input-label">PARENTS / CHILDREN</div>',
         unsafe_allow_html=True
     )
 
@@ -753,86 +663,102 @@ with c2:
         min_value=0,
         max_value=10,
         value=0,
+        step=1,
         label_visibility="collapsed"
     )
 
 
-st.markdown(
-    '<div class="divider"></div>',
-    unsafe_allow_html=True
-)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-
 # =========================================================
-# PREDICT BUTTON
+# CLOSE CARD BEFORE BUTTON
 # =========================================================
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 st.write("")
 
+
+# =========================================================
+# PREDICTION
+# =========================================================
+
 if st.button(
-    "🔮  PREDICT SURVIVAL",
-    use_container_width=True,
-    type="primary"
+    "🔮  Predict Survival",
+    use_container_width=True
 ):
 
-    # Gender encoding
-    s = 1 if gender == "female" else 0
+    # Encode gender
+    sex = 1 if gender == "female" else 0
 
-    # Input data
+    # Model input
     data = np.array([
         [
             pclass,
-            s,
+            sex,
             age,
             sibsp,
             parch,
             fare,
-            0,
-            1
+            0,   # Embarked_Q
+            1    # Embarked_S
         ]
     ])
 
     # Prediction
-    pred = model.predict(data)[0]
+    prediction = model.predict(data)[0]
 
     # Probability
-    prob = model.predict_proba(data)[0][1] * 100
+    probability = (
+        model.predict_proba(data)[0][1] * 100
+    )
 
 
     # =====================================================
     # SURVIVED
     # =====================================================
 
-    if pred == 1:
+    if prediction == 1:
 
         st.markdown(
-            f'''
-            <div class="result survived">
+            f"""
+            <div class="result success">
 
                 <div class="result-icon">
                     🎉
                 </div>
 
-                <h2>
-                    YOU SURVIVED!
-                </h2>
-
-                <div class="probability">
-                    Survival Probability: {prob:.1f}%
+                <div class="result-title">
+                    Passenger Survived
                 </div>
 
-                <p>
-                    🌊 The model predicts a high chance of survival.
-                </p>
+                <div class="result-text">
+                    The AI model predicts a high chance of survival.
+                </div>
+
+                <div class="progress-container">
+
+                    <div class="progress-label">
+                        <span>Survival Probability</span>
+                        <strong>{probability:.1f}%</strong>
+                    </div>
+
+                    <div class="progress-bg">
+
+                        <div
+                            class="progress-fill"
+                            style="width:{probability}%"
+                        ></div>
+
+                    </div>
+
+                </div>
 
             </div>
-            ''',
+            """,
             unsafe_allow_html=True
         )
 
         st.balloons()
+
 
     # =====================================================
     # DID NOT SURVIVE
@@ -841,92 +767,41 @@ if st.button(
     else:
 
         st.markdown(
-            f'''
-            <div class="result not-survived">
+            f"""
+            <div class="result danger">
 
                 <div class="result-icon">
                     💔
                 </div>
 
-                <h2>
-                    DID NOT SURVIVE
-                </h2>
-
-                <div class="probability">
-                    Survival Probability: {prob:.1f}%
+                <div class="result-title">
+                    Passenger Did Not Survive
                 </div>
 
-                <p>
-                    ⚠️ The model predicts a higher risk of non-survival.
-                </p>
-
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-
-    # =====================================================
-    # PROBABILITY
-    # =====================================================
-
-    st.write("")
-
-    st.markdown(
-        "<p style='text-align:center;color:#94a3b8;'>"
-        "AI Confidence Level"
-        "</p>",
-        unsafe_allow_html=True
-    )
-
-    st.progress(
-        int(prob)
-    )
-
-
-    # =====================================================
-    # RESULT STATS
-    # =====================================================
-
-    st.write("")
-
-    x, y = st.columns(2)
-
-    with x:
-
-        st.markdown(
-            f'''
-            <div class="info-box">
-
-                <div class="info-number">
-                    {prob:.1f}%
+                <div class="result-text">
+                    The AI model predicts a higher risk of non-survival.
                 </div>
 
-                <div class="info-text">
-                    SURVIVAL CHANCE
+                <div class="progress-container">
+
+                    <div class="progress-label">
+                        <span>Survival Probability</span>
+                        <strong>{probability:.1f}%</strong>
+                    </div>
+
+                    <div class="progress-bg">
+
+                        <div
+                            class="progress-fill"
+                            style="width:{probability}%"
+                        ></div>
+
+                    </div>
+
                 </div>
 
             </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-    with y:
-
-        st.markdown(
-            f'''
-            <div class="info-box">
-
-                <div class="info-number">
-                    {100-prob:.1f}%
-                </div>
-
-                <div class="info-text">
-                    NON-SURVIVAL RISK
-                </div>
-
-            </div>
-            ''',
+            """,
             unsafe_allow_html=True
         )
 
@@ -935,22 +810,17 @@ if st.button(
 # FOOTER
 # =========================================================
 
-st.markdown(
-    '''
-    <div class="footer">
+st.markdown("""
+<div class="footer">
 
-        🚢 Titanic AI Predictor
+    Titanic Survival Predictor &nbsp;•&nbsp;
+    Random Forest ML
 
-        <br><br>
+    <br>
 
-        Built with ❤️ using
-        <span>Python • Scikit-Learn • Streamlit</span>
+    Developed by <strong>Kavya Rajput</strong>
 
-        <br><br>
+</div>
+""", unsafe_allow_html=True)
+```
 
-        © 2026 <span>Kavya Rajput</span>
-
-    </div>
-    ''',
-    unsafe_allow_html=True
-)
